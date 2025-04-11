@@ -2,34 +2,62 @@
 function hideRecommendations() {
   // Check if we're on a YouTube video page
   if (window.location.pathname.includes("/watch")) {
-    // Target the recommendations panel - YouTube's layout might change, so we use multiple selectors
-    const selectors = [
-      "div#secondary", // Main recommendations container
-      "div#related", // Related videos
-      "div#items.ytd-watch-next-secondary-results-renderer", // Another possible container
-    ];
+    // Check if we're viewing a playlist
+    const isPlaylist = new URLSearchParams(window.location.search).has("list");
 
-    selectors.forEach((selector) => {
-      const element = document.querySelector(selector);
-      if (element) {
-        element.style.display = "none";
+    if (!isPlaylist) {
+      // If not a playlist, hide all recommendations
+      const selectors = [
+        "div#secondary", // Main recommendations container
+        "div#related", // Related videos
+        "div#items.ytd-watch-next-secondary-results-renderer", // Another possible container
+      ];
+
+      selectors.forEach((selector) => {
+        const element = document.querySelector(selector);
+        if (element) {
+          element.style.display = "none";
+        }
+      });
+
+      // Make the video player wider to fill the space
+      const player = document.querySelector("div#primary");
+      if (player) {
+        player.style.maxWidth = "100%";
+        player.style.width = "100%";
       }
-    });
 
-    // Make the video player wider to fill the space
-    const player = document.querySelector("div#primary");
-    if (player) {
-      player.style.maxWidth = "100%";
-      player.style.width = "100%";
-    }
+      // Hide recommendations in theater mode as well
+      const theaterContainer = document.querySelector(
+        "div#player-theater-container"
+      );
+      if (theaterContainer) {
+        theaterContainer.style.maxWidth = "100%";
+        theaterContainer.style.width = "100%";
+      }
+    } else {
+      // If it's a playlist, only hide recommended videos but keep playlist navigation
+      // First show everything to ensure we can see the playlist
+      showRecommendations();
 
-    // Hide recommendations in theater mode as well
-    const theaterContainer = document.querySelector(
-      "div#player-theater-container"
-    );
-    if (theaterContainer) {
-      theaterContainer.style.maxWidth = "100%";
-      theaterContainer.style.width = "100%";
+      // Then find and hide only the recommendations section
+      const recommendationsSection = document.querySelector(
+        "div#items.ytd-watch-next-secondary-results-renderer"
+      );
+      if (recommendationsSection) {
+        // Find all sections and hide only those that aren't part of the playlist
+        const sections = recommendationsSection.querySelectorAll(
+          "ytd-item-section-renderer"
+        );
+        sections.forEach((section) => {
+          // Check if this section has playlist items
+          const isPlaylistSection =
+            section.querySelector("ytd-playlist-panel-renderer") !== null;
+          if (!isPlaylistSection) {
+            section.style.display = "none";
+          }
+        });
+      }
     }
   }
 
@@ -75,6 +103,12 @@ function showRecommendations() {
       theaterContainer.style.maxWidth = "";
       theaterContainer.style.width = "";
     }
+
+    // Also restore any hidden playlist sections
+    const sections = document.querySelectorAll("ytd-item-section-renderer");
+    sections.forEach((section) => {
+      section.style.display = "";
+    });
   }
 
   // Restore homepage recommendations
