@@ -23,7 +23,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
             enabled: true,
           },
           function (response) {
-            // Handle potential error if content script is not ready
+            // Handle potential error if content script isn't ready
             if (chrome.runtime.lastError) {
               console.log("Error sending message:", chrome.runtime.lastError);
             }

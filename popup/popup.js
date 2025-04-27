@@ -1,9 +1,7 @@
-// When popup is loaded
 document.addEventListener("DOMContentLoaded", function () {
   const toggleButton = document.getElementById("toggle");
   const statusText = document.getElementById("status");
 
-  // Get current state from storage
   chrome.storage.sync.get({ enabled: true }, function (data) {
     toggleButton.checked = data.enabled;
     updateStatusText(data.enabled);
@@ -13,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
   toggleButton.addEventListener("change", function () {
     const isEnabled = toggleButton.checked;
 
-    // Save state to storage
     chrome.storage.sync.set({ enabled: isEnabled }, function () {
       updateStatusText(isEnabled);
 

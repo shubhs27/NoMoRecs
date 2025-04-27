@@ -1,20 +1,19 @@
-// Function to hide YouTube recommendations
 function hideRecommendations() {
   // Check if we're on a YouTube video page
   if (window.location.pathname.includes("/watch")) {
-    // Check if we're viewing a playlist
     const isPlaylist = new URLSearchParams(window.location.search).has("list");
 
     if (!isPlaylist) {
       // If not a playlist, hide all recommendations
       const selectors = [
         "div#secondary", // Main recommendations container
-        "div#related", // Related videos
+        "div#related",
         "div#items.ytd-watch-next-secondary-results-renderer", // Another possible container
       ];
 
       selectors.forEach((selector) => {
         const element = document.querySelector(selector);
+
         if (element) {
           element.style.display = "none";
         }
@@ -22,15 +21,17 @@ function hideRecommendations() {
 
       // Make the video player wider to fill the space
       const player = document.querySelector("div#primary");
+
       if (player) {
         player.style.maxWidth = "100%";
         player.style.width = "100%";
       }
 
-      // Hide recommendations in theater mode as well
+      // Hide recommendations in theater mode
       const theaterContainer = document.querySelector(
         "div#player-theater-container"
       );
+
       if (theaterContainer) {
         theaterContainer.style.maxWidth = "100%";
         theaterContainer.style.width = "100%";
@@ -44,15 +45,18 @@ function hideRecommendations() {
       const recommendationsSection = document.querySelector(
         "div#items.ytd-watch-next-secondary-results-renderer"
       );
+
       if (recommendationsSection) {
         // Find all sections and hide only those that aren't part of the playlist
         const sections = recommendationsSection.querySelectorAll(
           "ytd-item-section-renderer"
         );
+
         sections.forEach((section) => {
           // Check if this section has playlist items
           const isPlaylistSection =
             section.querySelector("ytd-playlist-panel-renderer") !== null;
+
           if (!isPlaylistSection) {
             section.style.display = "none";
           }
@@ -61,18 +65,18 @@ function hideRecommendations() {
     }
   }
 
-  // Hide recommendations ONLY on the YouTube homepage, NOT on subscriptions
+  // Hide recommendations ONLY on the YT homepage, NOT on subscriptions
   if (window.location.pathname === "/") {
     const homeRecommendations = document.querySelectorAll(
       "ytd-rich-item-renderer, ytd-shelf-renderer"
     );
+
     homeRecommendations.forEach((item) => {
       item.style.display = "none";
     });
   }
 }
 
-// Function to show recommendations
 function showRecommendations() {
   // Restore video page recommendations
   if (window.location.pathname.includes("/watch")) {
@@ -84,6 +88,7 @@ function showRecommendations() {
 
     selectors.forEach((selector) => {
       const element = document.querySelector(selector);
+
       if (element) {
         element.style.display = "";
       }
@@ -91,6 +96,7 @@ function showRecommendations() {
 
     // Restore original player width
     const player = document.querySelector("div#primary");
+
     if (player) {
       player.style.maxWidth = "";
       player.style.width = "";
@@ -99,13 +105,15 @@ function showRecommendations() {
     const theaterContainer = document.querySelector(
       "div#player-theater-container"
     );
+
     if (theaterContainer) {
       theaterContainer.style.maxWidth = "";
       theaterContainer.style.width = "";
     }
 
-    // Also restore any hidden playlist sections
+    // Restore any hidden playlist sections
     const sections = document.querySelectorAll("ytd-item-section-renderer");
+
     sections.forEach((section) => {
       section.style.display = "";
     });
@@ -122,13 +130,10 @@ function showRecommendations() {
   }
 }
 
-// Initialize MutationObserver
-let observer;
+let observer; // Initialize MutationObserver
 
-// Function to setup observer
 function setupObserver() {
-  // Set up an observer to hide recommendations when the DOM changes
-  // (YouTube uses a lot of AJAX to load content)
+  // Set up an observer to hide recommendations when the DOM changes as YT uses a lot of AJAX to load content
   observer = new MutationObserver(function () {
     chrome.storage.sync.get({ enabled: true }, function (data) {
       if (data.enabled) {
@@ -151,6 +156,7 @@ chrome.storage.sync.get({ enabled: true }, function (data) {
   } else {
     showRecommendations();
   }
+
   setupObserver();
 });
 
@@ -162,7 +168,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     } else {
       showRecommendations();
     }
-    // No page refresh needed
-    sendResponse({ success: true });
+
+    sendResponse({ success: true }); // No page refresh needed
   }
 });
